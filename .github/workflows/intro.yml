@@ -1,0 +1,14 @@
+name: hs_workflow_intro_to_github_actions
+on: [push]
+jobs:
+  show-secret-phrase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: abystoma/test
+          ref: CombinedPhrase
+      - name: Create file "hello.txt" with the word Hello
+        run: echo "Hello" > hello.txt
+      - name: Show me the answer
+        run: cat hello.txt from.txt
