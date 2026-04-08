@@ -1,27 +1,41 @@
-name: Access Issue Information
+name: Autocoder Workflow
 
 on:
   issues:
     types: [opened, reopened]
 
 jobs:
-  access_issue_info:
+  generate_code:
+    if: contains(github.event.issue.labels.*.name, 'autocoder-bot')
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print Issue Information
+      - name: Make script executable
+        run: chmod +x script.sh
+
+      - name: Run script
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
-          ISSUE_ASSIGNEES: ${{ join(github.event.issue.assignees.*.login, ', ') }}
-          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
+          REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          echo "Issue Number: ${ISSUE_NUMBER}"
-          echo "Issue Title: ${ISSUE_TITLE}"
-          echo "Issue Body: ${ISSUE_BODY}"
-          echo "Issue Assignees: ${ISSUE_ASSIGNEES}"
-          echo "Issue Labels: ${ISSUE_LABELS}"
+          ./script.sh "$ISSUE_NUMBER" "$REPO" "$GITHUB_TOKEN" "$OPENAI_API_KEY"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: autocoder-artifact
+          path: autocoder-bot/
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: autocoder-artifact
+          path: autocoder-artifact/
+
+      - name: Display Generated Code
+        run: ls -R autocoder-artifact/
