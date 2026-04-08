@@ -26,13 +26,13 @@ jobs:
           ./script.sh "$ISSUE_NUMBER" "$REPO" "$GITHUB_TOKEN" "$OPENAI_API_KEY"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: autocoder-artifact
           path: autocoder-bot/
 
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: autocoder-artifact
           path: autocoder-artifact/
