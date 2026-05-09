@@ -1,3 +1,49 @@
+name: Autocoder Bot (alias)
+
+on:
+  issues:
+    types: [opened, edited, labeled, reopened]
+
+permissions:
+  issues: read
+  contents: read
+
+jobs:
+  generate:
+    if: ${{ (github.event.action == 'labeled' && github.event.label.name == 'autocoder-bot') || (github.event.action != 'labeled' && contains(join(github.event.issue.labels.*.name, ','), 'autocoder-bot')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Make script executable
+        run: chmod +x scripts/script.sh
+
+      - name: Generate Code with ChatGPT
+        id: generate_code
+        run: |
+          ./scripts/script.sh "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.event.issue.number }}" "${{ secrets.OPENAI_API_KEY }}"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autocoder-artifact
+          path: autocoder-bot
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: autocoder-artifact
+          path: autocoder-artifact
+
+      - name: Display Generated Code
+        run: ls -laR autocoder-artifact
 name: Autocoder Workflow
 
 on:
@@ -14,7 +60,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Make script executable
-        run: chmod +x script.sh
+        run: chmod +x scripts/script.sh
 
       - name: Run script
         env:
