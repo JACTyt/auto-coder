@@ -1,4 +1,4 @@
-name: Autocoder Bot (alias)
+name: Autocoder Workflow
 
 on:
   issues:
@@ -43,44 +43,3 @@ jobs:
 
       - name: Display Generated Code
         run: ls -laR autocoder-artifact
-name: Autocoder Workflow
-
-on:
-  issues:
-    types: [opened, reopened]
-
-jobs:
-  generate_code:
-    if: contains(github.event.issue.labels.*.name, 'autocoder-bot')
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Make script executable
-        run: chmod +x scripts/script.sh
-
-      - name: Run script
-        env:
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          REPO: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          ./script.sh "$ISSUE_NUMBER" "$REPO" "$GITHUB_TOKEN" "$OPENAI_API_KEY"
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: autocoder-artifact
-          path: autocoder-bot/
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: autocoder-artifact
-          path: autocoder-artifact/
-
-      - name: Display Generated Code
-        run: ls -R autocoder-artifact/
