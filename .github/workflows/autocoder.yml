@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   generate:
-    if: ${{ (github.event.action == 'labeled' && github.event.label.name == 'autocoder-bot') || (github.event.action != 'labeled' && contains(join(github.event.issue.labels.*.name, ','), 'autocoder-bot')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
